@@ -138,7 +138,7 @@
 
 .hero-stats p,
 .hero-stats span {
-    color: #58645c;
+    color: #118b3a;
 }
 
 .hero-gallery {
@@ -404,7 +404,7 @@
 .landing-footer {
     padding: 26px clamp(20px, 4vw, 72px);
     text-align: center;
-    background: #0b3d24;
+    background: #2a9b63;
     color: white;
     font-size: 15px;
 }
@@ -453,6 +453,16 @@
     color: var(--primary);
     font-size: 48px;
     flex: 0 0 auto;
+}
+
+.form-error {
+    background: #fee2e2;
+    color: #b91c1c;
+    padding: 12px 14px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    font-size: 14px;
+    font-weight: 600;
 }
 
 @media (max-width: 1200px) {

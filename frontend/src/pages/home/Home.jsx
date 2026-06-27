@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import "./Home.css";
-
+import { loginApi, registerApi } from "../../api/authApi";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { toast } from "react-toastify";
 import logo from "../../assets/landing/logo.png";
 import heroBag from "../../assets/landing/hero-bag.jpg";
 import heroCard from "../../assets/landing/hero-card.jpg";
@@ -40,6 +43,23 @@ const heroItems = [
 function Home() {
     const [authModal, setAuthModal] = useState(null);
     const [activeHero, setActiveHero] = useState(0);
+    const navigate = useNavigate();
+    const { loadCurrentUser } = useAuth();
+
+    const [loginForm, setLoginForm] = useState({
+        email: "",
+        password: "",
+    });
+
+    const [registerForm, setRegisterForm] = useState({
+        full_name: "",
+        email: "",
+        phone: "",
+        password: "",
+    });
+
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
     const getHeroItem = (offset) => {
         return heroItems[(activeHero + offset) % heroItems.length];
@@ -53,6 +73,141 @@ function Home() {
         setActiveHero((prev) =>
             prev === 0 ? heroItems.length - 1 : prev - 1
         );
+    };
+
+    const isValidEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
+const validateLoginForm = () => {
+    if (!loginForm.email.trim()) {
+        toast.error("Vui lòng nhập email");
+        return false;
+    }
+
+    if (!isValidEmail(loginForm.email)) {
+        toast.error("Email không hợp lệ");
+        return false;
+    }
+
+    if (!loginForm.password.trim()) {
+        toast.error("Vui lòng nhập mật khẩu");
+        return false;
+    }
+
+    if (loginForm.password.length < 6) {
+        toast.error("Mật khẩu phải có ít nhất 6 ký tự");
+        return false;
+    }
+
+    return true;
+};
+
+    const validateRegisterForm = () => {
+        if (!registerForm.full_name.trim()) {
+            toast.error("Vui lòng nhập họ và tên");
+            return false;
+        }
+
+        if (registerForm.full_name.trim().length < 2) {
+            toast.error("Họ và tên phải có ít nhất 2 ký tự");
+            return false;
+        }
+
+        if (!registerForm.email.trim()) {
+            toast.error("Vui lòng nhập email");
+            return false;
+        }
+
+        if (!isValidEmail(registerForm.email)) {
+            toast.error("Email không hợp lệ");
+            return false;
+        }
+
+        if (!registerForm.phone.trim()) {
+            toast.error("Vui lòng nhập số điện thoại");
+            return false;
+        }
+
+        if (!/^[0-9]{10,11}$/.test(registerForm.phone)) {
+            toast.error("Số điện thoại phải gồm 10-11 chữ số");
+            return false;
+        }
+
+        if (!registerForm.password.trim()) {
+            toast.error("Vui lòng nhập mật khẩu");
+            return false;
+        }
+
+        if (registerForm.password.length < 6) {
+            toast.error("Mật khẩu phải có ít nhất 6 ký tự");
+            return false;
+        }
+
+        return true;
+    };
+
+    const handleLoginChange = (e) => {
+        setLoginForm({
+            ...loginForm,
+            [e.target.name]: e.target.value,
+        });
+    };
+
+    const handleRegisterChange = (e) => {
+        setRegisterForm({
+            ...registerForm,
+            [e.target.name]: e.target.value,
+        });
+    };
+
+    const handleLoginSubmit = async (e) => {
+        e.preventDefault();
+        if (!validateLoginForm()) return;
+        setError("");
+        setLoading(true);
+
+        try {
+            const res = await loginApi(loginForm);
+
+            localStorage.setItem("access_token", res.data.access_token);
+            localStorage.setItem("refresh_token", res.data.refresh_token);
+
+            await loadCurrentUser();
+            toast.success("Đăng nhập thành công ✔");
+            setAuthModal(null);
+            navigate("/app");
+
+            // Sau này có trang chính thì đổi thành navigate("/app")
+        } catch (err) {
+            toast.error(
+                err.response?.data?.detail || "Đăng nhập thất bại !"
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRegisterSubmit = async (e) => {
+        e.preventDefault();
+        if (!validateRegisterForm()) return;
+        setError("");
+        setLoading(true);
+
+        try {
+            await registerApi(registerForm);
+
+            toast.success(
+                "Đăng ký thành công. Hãy đăng nhập."
+            );
+            setAuthModal("login");
+        } catch (err) {
+            toast.error(
+                err.response?.data?.detail || "Đăng ký thất bại"
+            );
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
@@ -69,7 +224,7 @@ function Home() {
                 <div className="landing-brand">
                     <img src={logo} alt="Lost & Found" />
                     <span>
-                        Lost & <strong>Found</strong>
+                        Lost & <strong>Found UTH</strong>
                     </span>
                 </div>
 
@@ -228,38 +383,84 @@ function Home() {
                         </button>
 
                         {authModal === "login" ? (
-                            <>
-                                <h2>Đăng nhập</h2>
-                                <input placeholder="Email" />
-                                <input placeholder="Mật khẩu" type="password" />
-                                <button className="btn-primary modal-btn">
-                                    Đăng nhập
-                                </button>
-                                <p>
-                                    Chưa có tài khoản?{" "}
-                                    <button onClick={() => setAuthModal("register")}>
-                                        Đăng ký ngay
-                                    </button>
-                                </p>
-                            </>
-                        ) : (
-                            <>
-                                <h2>Đăng ký tài khoản</h2>
-                                <input placeholder="Họ và tên" />
-                                <input placeholder="Email" />
-                                <input placeholder="Số điện thoại" />
-                                <input placeholder="Mật khẩu" type="password" />
-                                <button className="btn-primary modal-btn">
-                                    Đăng ký
-                                </button>
-                                <p>
-                                    Đã có tài khoản?{" "}
-                                    <button onClick={() => setAuthModal("login")}>
-                                        Đăng nhập
-                                    </button>
-                                </p>
-                            </>
-                        )}
+                    <form onSubmit={handleLoginSubmit}>
+                        <h2>Đăng nhập</h2>
+
+                        {error && <div className="form-error">{error}</div>}
+
+                        <input
+                            name="email"
+                            placeholder="Email"
+                            value={loginForm.email}
+                            onChange={handleLoginChange}
+                        />
+
+                        <input
+                            name="password"
+                            placeholder="Mật khẩu"
+                            type="password"
+                            value={loginForm.password}
+                            onChange={handleLoginChange}
+                        />
+
+                        <button className="btn-primary modal-btn" disabled={loading}>
+                            {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+                        </button>
+
+                        <p>
+                            Chưa có tài khoản?{" "}
+                            <button type="button" onClick={() => setAuthModal("register")}>
+                                Đăng ký ngay
+                            </button>
+                        </p>
+                    </form>
+                ) : (
+                    <form onSubmit={handleRegisterSubmit}>
+                        <h2>Đăng ký tài khoản</h2>
+
+                        {error && <div className="form-error">{error}</div>}
+
+                        <input
+                            name="full_name"
+                            placeholder="Họ và tên"
+                            value={registerForm.full_name}
+                            onChange={handleRegisterChange}
+                        />
+
+                        <input
+                            name="email"
+                            placeholder="Email"
+                            value={registerForm.email}
+                            onChange={handleRegisterChange}
+                        />
+
+                        <input
+                            name="phone"
+                            placeholder="Số điện thoại"
+                            value={registerForm.phone}
+                            onChange={handleRegisterChange}
+                        />
+
+                        <input
+                            name="password"
+                            placeholder="Mật khẩu"
+                            type="password"
+                            value={registerForm.password}
+                            onChange={handleRegisterChange}
+                        />
+
+                        <button className="btn-primary modal-btn" disabled={loading}>
+                            {loading ? "Đang đăng ký..." : "Đăng ký"}
+                        </button>
+
+                        <p>
+                            Đã có tài khoản?{" "}
+                            <button type="button" onClick={() => setAuthModal("login")}>
+                                Đăng nhập
+                            </button>
+                        </p>
+                    </form>
+                )}
                     </div>
                 </div>
             )}
