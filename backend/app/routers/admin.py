@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
-
+from app.models.enums import UserStatus
 from app.db.session import get_db
 from app.dependencies.auth import get_current_admin
 from app.models.user import User
@@ -63,3 +64,64 @@ def get_admin_dashboard(
     current_admin: User = Depends(get_current_admin),
 ):
     return get_dashboard(db)
+
+@router.get("/users")
+def get_users(
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin),
+):
+    result = db.scalars(
+        select(User).order_by(User.created_at.desc())
+    ).all()
+
+    return result
+
+
+@router.patch("/users/{user_id}/lock")
+def lock_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin),
+):
+    user = db.get(User, user_id)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    if user.id == admin.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You cannot lock yourself",
+        )
+
+    user.status = UserStatus.LOCKED
+
+    db.commit()
+    db.refresh(user)
+
+    return user
+
+
+@router.patch("/users/{user_id}/unlock")
+def unlock_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin),
+):
+    user = db.get(User, user_id)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    user.status = UserStatus.ACTIVE
+
+    db.commit()
+    db.refresh(user)
+
+    return user
