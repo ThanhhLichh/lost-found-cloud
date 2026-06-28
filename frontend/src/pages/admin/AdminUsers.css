@@ -1,0 +1,190 @@
+.admin-users-page {
+    max-width: 1120px;
+    margin: 0 auto;
+}
+
+.admin-users-header,
+.users-table-card,
+.admin-users-empty {
+    background: white;
+    border: 1px solid #e2ece6;
+    border-radius: 24px;
+    box-shadow: 0 18px 45px rgba(0, 80, 35, 0.05);
+}
+
+.admin-users-header {
+    padding: 24px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: center;
+}
+
+.admin-users-header h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.admin-users-header p {
+    margin: 8px 0 0;
+    color: #68786f;
+}
+
+.admin-users-header > span {
+    background: #e8f7ee;
+    color: #087a38;
+    padding: 10px 14px;
+    border-radius: 999px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.admin-users-empty {
+    padding: 40px;
+    text-align: center;
+    color: #68786f;
+    font-weight: 700;
+}
+
+.users-table-card {
+    overflow: hidden;
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.users-table th {
+    text-align: left;
+    padding: 16px 18px;
+    color: #68786f;
+    font-size: 13px;
+    background: #f7fbf8;
+}
+
+.users-table td {
+    padding: 16px 18px;
+    border-top: 1px solid #edf3ef;
+    vertical-align: middle;
+}
+
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+}
+
+.user-cell strong {
+    display: block;
+}
+
+.user-cell p {
+    margin: 4px 0 0;
+    color: #68786f;
+    font-size: 13px;
+}
+
+.contact-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.contact-cell span {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #4b5c52;
+    font-size: 13px;
+}
+
+.contact-cell svg {
+    color: var(--primary);
+}
+
+.role-badge,
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.role-badge.admin {
+    background: #fff8e6;
+    color: #d97706;
+}
+
+.role-badge.user {
+    background: #eef4ff;
+    color: #2563eb;
+}
+
+.status-badge.active {
+    background: #e8f7ee;
+    color: #087a38;
+}
+
+.status-badge.locked {
+    background: #fff0f0;
+    color: #d92d20;
+}
+
+.lock-btn,
+.unlock-btn {
+    height: 42px;
+    padding: 0 14px;
+    border: none;
+    border-radius: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.lock-btn {
+    background: #fff0f0;
+    color: #d92d20;
+}
+
+.unlock-btn {
+    background: #e8f7ee;
+    color: #087a38;
+}
+
+.admin-note {
+    color: #68786f;
+    font-weight: 700;
+}
+
+@media (max-width: 900px) {
+    .users-table-card {
+        overflow-x: auto;
+    }
+
+    .users-table {
+        min-width: 900px;
+    }
+
+    .admin-users-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

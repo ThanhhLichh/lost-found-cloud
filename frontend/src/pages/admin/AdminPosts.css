@@ -1,0 +1,166 @@
+.admin-posts-page {
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+.admin-page-header {
+    background: white;
+    border: 1px solid #e2ece6;
+    border-radius: 24px;
+    padding: 24px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: center;
+    box-shadow: 0 18px 45px rgba(0, 80, 35, 0.05);
+}
+
+.admin-page-header h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.admin-page-header p {
+    margin: 8px 0 0;
+    color: #68786f;
+}
+
+.admin-page-header > span {
+    background: #fff8e6;
+    color: #d97706;
+    padding: 10px 14px;
+    border-radius: 999px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.admin-empty {
+    background: white;
+    border: 1px solid #e2ece6;
+    border-radius: 24px;
+    padding: 40px;
+    text-align: center;
+    color: #68786f;
+    font-weight: 700;
+}
+
+.admin-post-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.admin-post-card {
+    background: white;
+    border: 1px solid #e2ece6;
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 18px 45px rgba(0, 80, 35, 0.05);
+}
+
+.admin-post-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.admin-post-top h2 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.admin-post-top p {
+    margin: 8px 0 0;
+    color: #68786f;
+    font-size: 14px;
+}
+
+.pending-badge {
+    background: #fff8e6;
+    color: #f59e0b;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.admin-post-desc {
+    margin: 18px 0;
+    color: #3f4f46;
+    line-height: 1.7;
+}
+
+.admin-post-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.admin-post-meta span {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: #f2f7f4;
+    color: #425048;
+    border-radius: 999px;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.admin-post-meta svg {
+    color: var(--primary);
+    font-size: 17px;
+}
+
+.admin-post-actions {
+    margin-top: 22px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.approve-btn,
+.reject-btn {
+    height: 46px;
+    padding: 0 18px;
+    border: none;
+    border-radius: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.approve-btn {
+    background: #e8f7ee;
+    color: #087a38;
+}
+
+.reject-btn {
+    background: #fff0f0;
+    color: #d92d20;
+}
+
+.approve-btn svg,
+.reject-btn svg {
+    font-size: 22px;
+}
+
+@media (max-width: 700px) {
+    .admin-page-header,
+    .admin-post-top,
+    .admin-post-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .approve-btn,
+    .reject-btn {
+        justify-content: center;
+        width: 100%;
+    }
+}
