@@ -288,6 +288,45 @@
     background: #e8f7ee;
     color: #087a38;
 }
+.edit-profile-btn {
+    margin-left: auto;
+    height: 44px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 14px;
+    background: #e8f7ee;
+    color: var(--primary);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+}
+
+.edit-profile-btn svg {
+    font-size: 20px;
+}
+
+.change-password-btn {
+    height: 44px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 14px;
+    background: #eef4ff;
+    color: #2563eb;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.change-password-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.change-password-btn svg {
+    font-size: 18px;
+}
 
 @media (max-width: 700px) {
     .profile-card,

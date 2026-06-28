@@ -11,6 +11,7 @@ import {
     HiCheckCircle,
     HiClock,
     HiXCircle,
+    HiEye,
 } from "react-icons/hi2";
 
 import { useAuth } from "../../context/AuthContext";
@@ -21,11 +22,12 @@ import {
     updatePostApi,
     updatePostStatusApi,
 } from "../../api/postApi";
+import { changePasswordApi, updateProfileApi } from "../../api/userApi";
 import { Notify } from "../../utils/notify";
 import "./Profile.css";
 
 function Profile() {
-    const { user } = useAuth();
+    const { user, setUser } = useAuth();
 
     const [posts, setPosts] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -43,6 +45,14 @@ function Profile() {
         contact_phone: "",
     });
 
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+
+    const [passwordForm, setPasswordForm] = useState({
+        old_password: "",
+        new_password: "",
+        confirm_password: "",
+    });
+
     const loadMyPosts = async () => {
         setLoading(true);
 
@@ -56,6 +66,14 @@ function Profile() {
         }
     };
 
+    const [showProfileModal, setShowProfileModal] = useState(false);
+
+    const [profileForm, setProfileForm] = useState({
+        full_name: user?.full_name || "",
+        email: user?.email || "",
+        phone: user?.phone || "",
+    });
+
     const loadCategories = async () => {
         try {
             const res = await getCategoriesApi();
@@ -65,10 +83,82 @@ function Profile() {
         }
     };
 
+    const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+
+    setPasswordForm((prev) => ({
+        ...prev,
+        [name]: value,
+    }));
+};
+
+    const handleChangePassword = async (e) => {
+        e.preventDefault();
+
+        if (passwordForm.new_password !== passwordForm.confirm_password) {
+            Notify.error("Mật khẩu xác nhận không khớp");
+            return;
+        }
+
+        try {
+            await changePasswordApi({
+                old_password: passwordForm.old_password,
+                new_password: passwordForm.new_password,
+            });
+
+            Notify.success("Đổi mật khẩu thành công");
+            setShowPasswordModal(false);
+
+            setPasswordForm({
+                old_password: "",
+                new_password: "",
+                confirm_password: "",
+            });
+        } catch (err) {
+            Notify.error(err.response?.data?.detail || "Đổi mật khẩu thất bại");
+        }
+    };
+
     useEffect(() => {
         loadMyPosts();
         loadCategories();
     }, []);
+
+    useEffect(() => {
+        setProfileForm({
+            full_name: user?.full_name || "",
+            email: user?.email || "",
+            phone: user?.phone || "",
+        });
+    }, [user]);
+
+    const handleProfileChange = (e) => {
+    const { name, value } = e.target;
+
+    setProfileForm((prev) => ({
+        ...prev,
+        [name]: value,
+    }));
+};
+
+    const handleUpdateProfile = async (e) => {
+        e.preventDefault();
+
+        if (!profileForm.full_name.trim()) {
+            Notify.error("Vui lòng nhập họ tên");
+            return;
+        }
+
+        try {
+            const res = await updateProfileApi(profileForm);
+
+            setUser(res.data);
+            Notify.success("Cập nhật thông tin cá nhân thành công");
+            setShowProfileModal(false);
+        } catch (err) {
+            Notify.error(err.response?.data?.detail || "Cập nhật thông tin thất bại");
+        }
+    };
 
     const openEditModal = (post) => {
         setEditingPost(post);
@@ -197,6 +287,21 @@ function Profile() {
                         {user?.phone}
                     </p>
                 </div>
+
+                <button
+                    className="edit-profile-btn"
+                    onClick={() => setShowProfileModal(true)}
+                >
+                    <HiPencilSquare />
+                    Sửa thông tin
+                </button>
+                <button
+                    className="change-password-btn"
+                    onClick={() => setShowPasswordModal(true)}
+                >
+                    <HiEye />
+                    Đổi mật khẩu
+                </button>
             </section>
 
             <section className="my-posts-section">
@@ -404,6 +509,120 @@ function Profile() {
 
                                 <button type="submit" className="save-edit-btn">
                                     Lưu thay đổi
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+            {showProfileModal && (
+                <div className="profile-modal-overlay">
+                    <div className="profile-edit-modal">
+                        <div className="profile-modal-header">
+                            <h2>Sửa thông tin cá nhân</h2>
+                            <button onClick={() => setShowProfileModal(false)}>×</button>
+                        </div>
+
+                        <form onSubmit={handleUpdateProfile} className="profile-edit-form">
+                            <div className="form-grid">
+                                <div className="form-group full">
+                                    <label>Họ và tên</label>
+                                    <input
+                                        name="full_name"
+                                        value={profileForm.full_name}
+                                        onChange={handleProfileChange}
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Email</label>
+                                    <input
+                                        name="email"
+                                        value={profileForm.email}
+                                        onChange={handleProfileChange}
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Số điện thoại</label>
+                                    <input
+                                        name="phone"
+                                        value={profileForm.phone}
+                                        onChange={handleProfileChange}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="profile-modal-actions">
+                                <button
+                                    type="button"
+                                    className="cancel-edit-btn"
+                                    onClick={() => setShowProfileModal(false)}
+                                >
+                                    Hủy
+                                </button>
+
+                                <button type="submit" className="save-edit-btn">
+                                    Lưu thay đổi
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {showPasswordModal && (
+                <div className="profile-modal-overlay">
+                    <div className="profile-edit-modal">
+                        <div className="profile-modal-header">
+                            <h2>Đổi mật khẩu</h2>
+                            <button onClick={() => setShowPasswordModal(false)}>×</button>
+                        </div>
+
+                        <form onSubmit={handleChangePassword} className="profile-edit-form">
+                            <div className="form-grid">
+                                <div className="form-group full">
+                                    <label>Mật khẩu hiện tại</label>
+                                    <input
+                                        type="password"
+                                        name="old_password"
+                                        value={passwordForm.old_password}
+                                        onChange={handlePasswordChange}
+                                    />
+                                </div>
+
+                                <div className="form-group full">
+                                    <label>Mật khẩu mới</label>
+                                    <input
+                                        type="password"
+                                        name="new_password"
+                                        value={passwordForm.new_password}
+                                        onChange={handlePasswordChange}
+                                    />
+                                </div>
+
+                                <div className="form-group full">
+                                    <label>Xác nhận mật khẩu mới</label>
+                                    <input
+                                        type="password"
+                                        name="confirm_password"
+                                        value={passwordForm.confirm_password}
+                                        onChange={handlePasswordChange}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="profile-modal-actions">
+                                <button
+                                    type="button"
+                                    className="cancel-edit-btn"
+                                    onClick={() => setShowPasswordModal(false)}
+                                >
+                                    Hủy
+                                </button>
+
+                                <button type="submit" className="save-edit-btn">
+                                    Đổi mật khẩu
                                 </button>
                             </div>
                         </form>
