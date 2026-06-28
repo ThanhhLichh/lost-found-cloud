@@ -410,6 +410,50 @@
     letter-spacing: 0;
 }
 
+.navbar-icon-button {
+    width: 82px;
+    height: 54px;
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    color: #46564d;
+    font-size: 27px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+.navbar-icon-button:hover {
+    background: #e6f6ed;
+    color: var(--primary);
+}
+
+.side-menu-button {
+    height: 54px;
+    padding: 0 16px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: #425048;
+    font-weight: 700;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 15px;
+    width: 100%;
+    text-align: left;
+}
+
+.side-menu-button svg {
+    font-size: 24px;
+}
+
+.side-menu-button:hover {
+    background: #e6f6ed;
+    color: var(--primary);
+}
+
 @media (max-width: 1200px) {
     .app-navbar {
         grid-template-columns: 260px 1fr 280px;

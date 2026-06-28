@@ -5,6 +5,20 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from app.models.enums import ApprovalStatus, PostType
 
 
+class PostUserResponse(BaseModel):
+    id: int
+    full_name: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PostCategoryResponse(BaseModel):
+    id: int
+    name: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class PostCreateRequest(BaseModel):
     title: str = Field(min_length=2, max_length=255)
     type: PostType
@@ -34,6 +48,10 @@ class PostResponse(BaseModel):
     id: int
     user_id: int
     category_id: int
+
+    user: PostUserResponse | None = None
+    category: PostCategoryResponse | None = None
+
     title: str
     type: PostType
     description: str

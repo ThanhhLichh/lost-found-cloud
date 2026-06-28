@@ -19,6 +19,10 @@ import "./MainLayout.css";
 function MainLayout() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    
+    const openCreatePostModal = () => {
+        navigate("/app?createPost=1");
+    };
 
     const handleLogout = () => {
         logout();
@@ -40,9 +44,14 @@ function MainLayout() {
                         <HiHome />
                     </NavLink>
 
-                    <NavLink to="/app/create-post" title="Đăng bài">
+                    <button
+                        type="button"
+                        className="navbar-icon-button"
+                        title="Đăng bài"
+                        onClick={openCreatePostModal}
+                    >
                         <HiPlusCircle />
-                    </NavLink>
+                    </button>
 
                     <NavLink to="/app/profile" title="Trang cá nhân">
                         <HiUser />
@@ -81,10 +90,14 @@ function MainLayout() {
                             <span>Trang chủ</span>
                         </NavLink>
 
-                        <NavLink to="/app/create-post">
+                        <button
+                            type="button"
+                            className="side-menu-button"
+                            onClick={openCreatePostModal}
+                        >
                             <HiPlusCircle />
                             <span>Đăng bài mới</span>
-                        </NavLink>
+                        </button>
 
                         <NavLink to="/app/profile">
                             <HiUser />

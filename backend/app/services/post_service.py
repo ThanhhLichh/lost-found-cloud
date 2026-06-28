@@ -2,6 +2,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from sqlalchemy.orm import joinedload
 from app.models.category import Category
 from app.models.enums import ApprovalStatus, FoundPostStatus, LostPostStatus, PostType
 from app.models.post import Post
@@ -76,7 +77,10 @@ def get_posts(
     post_type: PostType | None = None,
     approval_status: ApprovalStatus | None = ApprovalStatus.APPROVED,
 ) -> list[Post]:
-    query = select(Post)
+    query = select(Post).options(
+        joinedload(Post.user),
+        joinedload(Post.category),
+    )
 
     if approval_status:
         query = query.where(Post.approval_status == approval_status)
@@ -103,7 +107,14 @@ def get_post_by_id(
     db: Session,
     post_id: int,
 ) -> Post:
-    post = db.get(Post, post_id)
+    post = db.scalar(
+        select(Post)
+        .options(
+            joinedload(Post.user),
+            joinedload(Post.category),
+        )
+        .where(Post.id == post_id)
+    )
 
     if not post:
         raise HTTPException(
