@@ -1,4 +1,4 @@
-import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { Outlet, NavLink, useNavigate, useLocation  } from "react-router-dom";
 import {
     HiHome,
     HiPlusCircle,
@@ -10,6 +10,7 @@ import {
     HiTrophy,
     HiTag,
     HiMapPin,
+    HiArchiveBox,
 } from "react-icons/hi2";
 
 import { useAuth } from "../context/AuthContext";
@@ -19,6 +20,10 @@ import "./MainLayout.css";
 function MainLayout() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+
+    const location = useLocation();
+
+    const isAdminPage = location.pathname.startsWith("/app/admin");
     
     const openCreatePostModal = () => {
         navigate("/app?createPost=1");
@@ -28,6 +33,8 @@ function MainLayout() {
         logout();
         navigate("/");
     };
+
+
 
     return (
         <div className="app-shell">
@@ -57,11 +64,7 @@ function MainLayout() {
                         <HiUser />
                     </NavLink>
 
-                    {user?.role === "ADMIN" && (
-                        <NavLink to="/app/admin" title="Quản trị">
-                            <HiChartBar />
-                        </NavLink>
-                    )}
+                    
                 </nav>
 
                 <div className="navbar-right">
@@ -105,10 +108,22 @@ function MainLayout() {
                         </NavLink>
 
                         {user?.role === "ADMIN" && (
-                            <NavLink to="/app/admin">
-                                <HiChartBar />
-                                <span>Quản trị hệ thống</span>
-                            </NavLink>
+                            <>
+                                <NavLink to="/app/admin/dashboard">
+                                    <HiChartBar />
+                                    <span>Dashboard</span>
+                                </NavLink>
+
+                                <NavLink to="/app/admin/posts">
+                                    <HiArchiveBox />
+                                    <span>Quản lý bài đăng</span>
+                                </NavLink>
+
+                                <NavLink to="/app/admin/users">
+                                    <HiUser />
+                                    <span>Quản lý người dùng</span>
+                                </NavLink>
+                            </>
                         )}
                     </nav>
 
@@ -127,7 +142,8 @@ function MainLayout() {
                 <main className="feed-content">
                     <Outlet />
                 </main>
-
+                
+                {!isAdminPage && (
                 <aside className="right-sidebar">
                     <section className="ranking-card">
                 <div className="ranking-header">
@@ -203,6 +219,7 @@ function MainLayout() {
 
                     
                 </aside>
+                )}
             </div>
         </div>
     );

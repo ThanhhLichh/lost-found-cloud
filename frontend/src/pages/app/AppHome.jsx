@@ -10,13 +10,23 @@ import {
     HiPhone,
     HiMagnifyingGlassCircle,
     HiArchiveBox,
+    HiEllipsisVertical,
+    HiPencilSquare,
+    HiTrash,
+    HiCheckCircle,
 } from "react-icons/hi2";
+import {
+    createPostApi,
+    deletePostApi,
+    getPostsApi,
+    updatePostApi,
+    updatePostStatusApi,
+} from "../../api/postApi";
 
 import { useAuth } from "../../context/AuthContext";
 import "./AppHome.css";
 import { Notify } from "../../utils/notify";
 import { getCategoriesApi } from "../../api/categoryApi";
-import { createPostApi, getPostsApi } from "../../api/postApi";
 import CreatePostModal from "../../components/feed/CreatePostModal";
 import PostSkeleton from "../../components/feed/PostSkeleton";
 
@@ -33,6 +43,19 @@ function AppHome() {
     const observerRef = useRef(null);
 
     const [searchParams, setSearchParams] = useSearchParams();
+    const [openMenuPostId, setOpenMenuPostId] = useState(null);
+
+    const [editingPost, setEditingPost] = useState(null);
+    const [editForm, setEditForm] = useState({
+        title: "",
+        category_id: "",
+        description: "",
+        location: "",
+        event_date: "",
+        image_url: "",
+        contact_email: "",
+        contact_phone: "",
+    });
 
     const [postForm, setPostForm] = useState({
         title: "",
@@ -72,6 +95,106 @@ function AppHome() {
             Notify.error("Không tải được danh sách bài đăng");
         } finally {
             setLoadingPosts(false);
+        }
+    };
+
+    const isMyPost = (post) => {
+        return post.user_id === user?.id;
+    };
+
+    const openEditPostModal = (post) => {
+        setEditingPost(post);
+        setOpenMenuPostId(null);
+
+        setEditForm({
+            title: post.title || "",
+            category_id: post.category_id || "",
+            description: post.description || "",
+            location: post.location || "",
+            event_date: post.event_date || "",
+            image_url: post.image_url || "",
+            contact_email: post.contact_email || "",
+            contact_phone: post.contact_phone || "",
+        });
+    };
+
+    const closeEditPostModal = () => {
+        setEditingPost(null);
+    };
+
+    const handleEditFormChange = (e) => {
+        const { name, value } = e.target;
+
+        setEditForm((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    const handleUpdatePost = async (e) => {
+        e.preventDefault();
+
+        try {
+            await updatePostApi(editingPost.id, {
+                ...editForm,
+                category_id: Number(editForm.category_id),
+                image_url: editForm.image_url || null,
+            });
+
+            Notify.info("Bài đăng đã được cập nhật và đang chờ Admin duyệt lại.");
+
+            setEditingPost(null);
+
+            setPosts((prev) =>
+                prev.filter((post) => post.id !== editingPost.id)
+            );
+        } catch (err) {
+            Notify.error(err.response?.data?.detail || "Cập nhật bài đăng thất bại");
+        }
+    };
+
+    const handleDeletePost = async (postId) => {
+        const ok = window.confirm("Bạn có chắc muốn xóa bài đăng này không?");
+        if (!ok) return;
+
+        try {
+            await deletePostApi(postId);
+
+            Notify.success("Đã xóa bài đăng");
+
+            setOpenMenuPostId(null);
+            setPosts((prev) => prev.filter((post) => post.id !== postId));
+        } catch (err) {
+            Notify.error(err.response?.data?.detail || "Xóa bài đăng thất bại");
+        }
+    };
+
+    const handleUpdateStatus = async (post) => {
+        const newStatus =
+            post.type === "LOST"
+                ? post.status === "SEARCHING"
+                    ? "FOUND"
+                    : "SEARCHING"
+                : post.status === "WAITING_OWNER"
+                ? "RETURNED"
+                : "WAITING_OWNER";
+
+        try {
+            await updatePostStatusApi(post.id, newStatus);
+
+            Notify.success("Cập nhật trạng thái thành công");
+
+            setOpenMenuPostId(null);
+
+            setPosts((prev) =>
+                prev.map((item) =>
+                    item.id === post.id
+                        ? { ...item, status: newStatus }
+                        : item
+                )
+            );
+        } catch (err) {
+            Notify.error(err.response?.data?.detail || "Cập nhật trạng thái thất bại");
         }
     };
 
@@ -299,18 +422,50 @@ const validatePostForm = () => {
                             </div>
 
                             <span className={`post-type ${post.type === "LOST" ? "lost" : "found"}`}>
-                                <>
-                                    {post.type === "LOST" ? (
-                                        <HiMagnifyingGlassCircle />
-                                    ) : (
-                                        <HiArchiveBox />
-                                    )}
+                                    {post.type === "LOST" ? <HiMagnifyingGlassCircle /> : <HiArchiveBox />}
+                                    {post.type === "LOST" ? "Mất đồ" : "Nhặt được"}
+                                </span>
 
-                                    {post.type === "LOST"
-                                        ? "Mất đồ"
-                                        : "Nhặt được"}
-                                </>
-                            </span>
+                                {isMyPost(post) && (
+                                    <div className="post-owner-actions">
+                                        <button
+                                            className="post-menu-btn"
+                                            onClick={() =>
+                                                setOpenMenuPostId(openMenuPostId === post.id ? null : post.id)
+                                            }
+                                        >
+                                            <HiEllipsisVertical />
+                                        </button>
+
+                                        {openMenuPostId === post.id && (
+                                            <div className="post-menu-dropdown">
+                                                <button onClick={() => handleUpdateStatus(post)}>
+                                                    <HiCheckCircle />
+                                                    {post.type === "LOST"
+                                                        ? post.status === "SEARCHING"
+                                                            ? "Đã tìm thấy"
+                                                            : "Đang tìm"
+                                                        : post.status === "WAITING_OWNER"
+                                                        ? "Đã trả lại"
+                                                        : "Chờ chủ nhận"}
+                                                </button>
+
+                                                <button onClick={() => openEditPostModal(post)}>
+                                                    <HiPencilSquare />
+                                                    Sửa bài
+                                                </button>
+
+                                                <button
+                                                    className="danger"
+                                                    onClick={() => handleDeletePost(post.id)}
+                                                >
+                                                    <HiTrash />
+                                                    Xóa bài
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                         </div>
 
                         <h2>{post.title}</h2>
@@ -377,6 +532,16 @@ const validatePostForm = () => {
                         <p className="feed-message">Bạn đã xem hết bài đăng.</p>
                     )}
             </div>
+
+            {editingPost && (
+                <CreatePostModal
+                    categories={categories}
+                    postForm={editForm}
+                    onChange={handleEditFormChange}
+                    onSubmit={handleUpdatePost}
+                    onClose={closeEditPostModal}
+                />
+            )}
 
             {showCreateModal && (
                 <CreatePostModal

@@ -429,24 +429,40 @@
 }
 
 .side-menu-button {
+    width: 100%;
     height: 54px;
-    padding: 0 16px;
-    border-radius: 16px;
+
     display: flex;
     align-items: center;
     gap: 14px;
-    color: #425048;
-    font-weight: 700;
+
+    padding: 0 16px;
+
     border: none;
+    outline: none;
+
     background: transparent;
+
+    border-radius: 16px;
+
+    color: #425048;
+
+    font-family: inherit;   
+    font-size: 17px;        
+    font-weight: 700;       
+    line-height: 1;
+
     cursor: pointer;
-    font-size: 15px;
-    width: 100%;
+
     text-align: left;
 }
 
-.side-menu-button svg {
-    font-size: 24px;
+.side-menu-button span{
+    font: inherit;
+}
+
+.side-menu-button svg{
+    font-size:24px;
 }
 
 .side-menu-button:hover {
