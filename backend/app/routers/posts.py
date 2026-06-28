@@ -1,20 +1,27 @@
 from fastapi import APIRouter, Depends, Query, status
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.orm import Session, joinedload
 
 from app.db.session import get_db
 from app.dependencies.auth import get_current_active_user
 from app.models.enums import ApprovalStatus, PostType
+from app.models.post import Post
 from app.models.user import User
 from app.schemas.auth import MessageResponse
-from app.schemas.post import PostCreateRequest, PostResponse, PostUpdateRequest
+from app.schemas.post import (
+    PostCreateRequest,
+    PostResponse,
+    PostUpdateRequest,
+    PostStatusUpdateRequest,
+)
 from app.services.post_service import (
     create_post,
     delete_post,
     get_post_by_id,
     get_posts,
     update_post,
+    update_post_status,
 )
-
 router = APIRouter(
     prefix="/posts",
     tags=["Posts"],
@@ -58,6 +65,42 @@ def get_post_feed(
         approval_status=ApprovalStatus.APPROVED,
     )
 
+
+@router.get(
+    "/me",
+    response_model=list[PostResponse],
+)
+def get_my_posts(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    return db.scalars(
+        select(Post)
+        .options(
+            joinedload(Post.user),
+            joinedload(Post.category),
+        )
+        .where(Post.user_id == current_user.id)
+        .order_by(Post.created_at.desc())
+    ).all()
+
+
+@router.patch(
+    "/{post_id}/status",
+    response_model=PostResponse,
+)
+def update_existing_post_status(
+    post_id: int,
+    request: PostStatusUpdateRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    return update_post_status(
+        db,
+        post_id,
+        request.status,
+        current_user,
+    )
 
 @router.get(
     "/{post_id}",

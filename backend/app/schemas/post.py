@@ -18,6 +18,9 @@ class PostCategoryResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class PostStatusUpdateRequest(BaseModel):
+    status: str = Field(min_length=2, max_length=50)
+
 
 class PostCreateRequest(BaseModel):
     title: str = Field(min_length=2, max_length=255)
@@ -41,7 +44,7 @@ class PostUpdateRequest(BaseModel):
     image_url: str | None = None
     contact_email: EmailStr | None = None
     contact_phone: str | None = Field(default=None, min_length=10, max_length=20)
-    status: str | None = Field(default=None, min_length=2, max_length=50)
+ 
 
 
 class PostResponse(BaseModel):

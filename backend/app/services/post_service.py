@@ -157,6 +157,28 @@ def update_post(
 
     return post
 
+def update_post_status(
+    db: Session,
+    post_id: int,
+    new_status: str,
+    current_user: User,
+) -> Post:
+    post = get_post_by_id(db, post_id)
+
+    if post.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only update your own posts",
+        )
+
+    validate_post_status(post.type, new_status)
+
+    post.status = new_status
+
+    db.commit()
+    db.refresh(post)
+
+    return post
 
 def delete_post(
     db: Session,
