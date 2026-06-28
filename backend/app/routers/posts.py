@@ -22,6 +22,8 @@ from app.services.post_service import (
     update_post,
     update_post_status,
 )
+from sqlalchemy import func
+
 router = APIRouter(
     prefix="/posts",
     tags=["Posts"],
@@ -101,6 +103,32 @@ def update_existing_post_status(
         request.status,
         current_user,
     )
+
+@router.get("/ranking")
+def get_post_ranking(
+    db: Session = Depends(get_db),
+):
+    result = db.execute(
+        select(
+            User.id,
+            User.full_name,
+            func.count(Post.id).label("returned_count"),
+        )
+        .join(Post, Post.user_id == User.id)
+        .where(Post.status == "RETURNED")
+        .group_by(User.id, User.full_name)
+        .order_by(func.count(Post.id).desc())
+        .limit(5)
+    ).all()
+
+    return [
+        {
+            "user_id": row.id,
+            "full_name": row.full_name,
+            "returned_count": row.returned_count,
+        }
+        for row in result
+    ]
 
 @router.get(
     "/{post_id}",

@@ -470,6 +470,15 @@
     color: var(--primary);
 }
 
+.ranking-empty {
+    margin: 0;
+    padding: 18px;
+    text-align: center;
+    color: #68786f;
+    background: #f7fbf8;
+    border-radius: 16px;
+    font-weight: 700;
+}
 @media (max-width: 1200px) {
     .app-navbar {
         grid-template-columns: 260px 1fr 280px;

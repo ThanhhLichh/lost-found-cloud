@@ -1,4 +1,5 @@
 import { Outlet, NavLink, useNavigate, useLocation  } from "react-router-dom";
+import { useEffect, useState } from "react";
 import {
     HiHome,
     HiPlusCircle,
@@ -13,6 +14,7 @@ import {
     HiArchiveBox,
 } from "react-icons/hi2";
 
+import { getRankingApi } from "../api/postApi";
 import { useAuth } from "../context/AuthContext";
 import logo from "../assets/landing/logo.png";
 import "./MainLayout.css";
@@ -24,7 +26,19 @@ function MainLayout() {
     const location = useLocation();
 
     const isAdminPage = location.pathname.startsWith("/app/admin");
+
+    const [ranking, setRanking] = useState([]);
     
+
+    const loadRanking = async () => {
+    try {
+        const res = await getRankingApi();
+        setRanking(res.data);
+    } catch {
+        setRanking([]);
+    }
+};
+
     const openCreatePostModal = () => {
         navigate("/app?createPost=1");
     };
@@ -33,6 +47,10 @@ function MainLayout() {
         logout();
         navigate("/");
     };
+
+    useEffect(() => {
+        loadRanking();
+    }, []);
 
 
 
@@ -156,33 +174,36 @@ function MainLayout() {
                     </div>
                 </div>
 
-                <div className="rank-item rank-gold">
-                    <span className="rank-number">1</span>
-                    <div className="rank-avatar">A</div>
-                    <div className="rank-info">
-                        <strong>Nguyễn Văn A</strong>
-                        <p>12 món đã trả</p>
-                        <small>Top Helper</small>
-                    </div>
-                </div>
+                {ranking.length === 0 ? (
+                    <p className="ranking-empty">Chưa có dữ liệu xếp hạng.</p>
+                ) : (
+                    ranking.map((item, index) => (
+                        <div
+                            className={`rank-item ${
+                                index === 0
+                                    ? "rank-gold"
+                                    : index === 1
+                                    ? "rank-silver"
+                                    : index === 2
+                                    ? "rank-bronze"
+                                    : ""
+                            }`}
+                            key={item.user_id}
+                        >
+                            <span className="rank-number">{index + 1}</span>
 
-                <div className="rank-item rank-silver">
-                    <span className="rank-number">2</span>
-                    <div className="rank-avatar">B</div>
-                    <div className="rank-info">
-                        <strong>Trần Thị B</strong>
-                        <p>9 món đã trả</p>
-                    </div>
-                </div>
+                            <div className="rank-avatar">
+                                {item.full_name?.charAt(0) || "U"}
+                            </div>
 
-                <div className="rank-item rank-bronze">
-                    <span className="rank-number">3</span>
-                    <div className="rank-avatar">C</div>
-                    <div className="rank-info">
-                        <strong>Lê Minh C</strong>
-                        <p>7 món đã trả</p>
-                    </div>
-                </div>
+                            <div className="rank-info">
+                                <strong>{item.full_name}</strong>
+                                <p>{item.returned_count} món đã trả</p>
+                                {index === 0 && <small>Top Helper</small>}
+                            </div>
+                        </div>
+                    ))
+                )}
             </section>
 
                     <section className="filter-card">

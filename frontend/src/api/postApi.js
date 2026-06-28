@@ -32,3 +32,7 @@ export const updatePostStatusApi = (postId, status) => {
         status,
     });
 };
+
+export const getRankingApi = () => {
+    return axiosClient.get("/posts/ranking");
+};
