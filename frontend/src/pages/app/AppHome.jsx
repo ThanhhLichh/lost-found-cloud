@@ -23,6 +23,7 @@ import {
     updatePostStatusApi,
 } from "../../api/postApi";
 import { uploadImageApi } from "../../api/uploadApi";
+import { adminDeletePostApi } from "../../api/adminApi";
 
 import { useAuth } from "../../context/AuthContext";
 import "./AppHome.css";
@@ -228,6 +229,32 @@ const loadCategories = async () => {
         setCategories(res.data);
     } catch {
         Notify.error("Không tải được danh mục");
+    }
+};
+
+const handleAdminDeletePost = async (postId) => {
+    const ok = window.confirm(
+        "Bạn có chắc muốn xóa bài đăng này không?"
+    );
+
+    if (!ok) return;
+
+    try {
+        await adminDeletePostApi(postId);
+
+        Notify.success("Đã xóa bài đăng");
+
+        setOpenMenuPostId(null);
+
+        setPosts((prev) =>
+            prev.filter((post) => post.id !== postId)
+        );
+
+    } catch (err) {
+        Notify.error(
+            err.response?.data?.detail ||
+            "Xóa bài đăng thất bại"
+        );
     }
 };
 
@@ -450,7 +477,7 @@ const validatePostForm = () => {
                                     {post.type === "LOST" ? "Mất đồ" : "Nhặt được"}
                                 </span>
 
-                                {isMyPost(post) && (
+                                {(isMyPost(post) || user?.role === "ADMIN") && (
                                     <div className="post-owner-actions">
                                         <button
                                             className="post-menu-btn"
@@ -463,29 +490,39 @@ const validatePostForm = () => {
 
                                         {openMenuPostId === post.id && (
                                             <div className="post-menu-dropdown">
-                                                <button onClick={() => handleUpdateStatus(post)}>
-                                                    <HiCheckCircle />
-                                                    {post.type === "LOST"
-                                                        ? post.status === "SEARCHING"
-                                                            ? "Đã tìm thấy"
-                                                            : "Đang tìm"
-                                                        : post.status === "WAITING_OWNER"
-                                                        ? "Đã trả lại"
-                                                        : "Chờ chủ nhận"}
-                                                </button>
 
-                                                <button onClick={() => openEditPostModal(post)}>
-                                                    <HiPencilSquare />
-                                                    Sửa bài
-                                                </button>
+                                                {isMyPost(post) && (
+                                                    <>
+                                                        <button onClick={() => handleUpdateStatus(post)}>
+                                                            <HiCheckCircle />
+                                                            ...
+                                                        </button>
 
-                                                <button
-                                                    className="danger"
-                                                    onClick={() => handleDeletePost(post.id)}
-                                                >
-                                                    <HiTrash />
-                                                    Xóa bài
-                                                </button>
+                                                        <button onClick={() => openEditPostModal(post)}>
+                                                            <HiPencilSquare />
+                                                            Sửa bài
+                                                        </button>
+
+                                                        <button
+                                                            className="danger"
+                                                            onClick={() => handleDeletePost(post.id)}
+                                                        >
+                                                            <HiTrash />
+                                                            Xóa bài
+                                                        </button>
+                                                    </>
+                                                )}
+
+                                                {!isMyPost(post) && user?.role === "ADMIN" && (
+                                                    <button
+                                                        className="danger"
+                                                        onClick={() => handleAdminDeletePost(post.id)}
+                                                    >
+                                                        <HiTrash />
+                                                        Xóa bài đăng
+                                                    </button>
+                                                )}
+
                                             </div>
                                         )}
                                     </div>

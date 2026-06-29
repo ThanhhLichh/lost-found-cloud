@@ -78,9 +78,11 @@ function MainLayout() {
                         <HiPlusCircle />
                     </button>
 
-                    <NavLink to="/app/profile" title="Trang cá nhân">
-                        <HiUser />
-                    </NavLink>
+                    {user?.role !== "ADMIN" && (
+                        <NavLink to="/app/profile" title="Trang cá nhân">
+                            <HiUser />
+                        </NavLink>
+                    )}
 
                     
                 </nav>
@@ -120,10 +122,12 @@ function MainLayout() {
                             <span>Đăng bài mới</span>
                         </button>
 
-                        <NavLink to="/app/profile">
-                            <HiUser />
-                            <span>Trang cá nhân</span>
-                        </NavLink>
+                        {user?.role !== "ADMIN" && (
+                            <NavLink to="/app/profile">
+                                <HiUser />
+                                <span>Trang cá nhân</span>
+                            </NavLink>
+                        )}
 
                         {user?.role === "ADMIN" && (
                             <>

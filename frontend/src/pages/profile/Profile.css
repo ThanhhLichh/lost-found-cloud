@@ -328,6 +328,20 @@
     font-size: 18px;
 }
 
+.my-post-image {
+    margin: 16px 0;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid #e2ece6;
+}
+
+.my-post-image img {
+    width: 100%;
+    max-height: 460px;
+    object-fit: cover;
+    display: block;
+}
+
 @media (max-width: 700px) {
     .profile-card,
     .section-header,

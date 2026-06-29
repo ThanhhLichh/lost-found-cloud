@@ -23,6 +23,9 @@ export const lockUserApi = (userId) => {
 export const unlockUserApi = (userId) => {
     return axiosClient.patch(`/admin/users/${userId}/unlock`);
 };
+export const adminDeletePostApi = (postId) => {
+    return axiosClient.delete(`/admin/posts/${postId}`);
+};
 export const getAdminDashboardApi = () => {
     return axiosClient.get("/admin/dashboard");
 };

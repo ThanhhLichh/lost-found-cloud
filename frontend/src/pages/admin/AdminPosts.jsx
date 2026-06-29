@@ -7,12 +7,14 @@ import {
     HiCalendarDays,
     HiEnvelope,
     HiPhone,
+    HiTrash,
 } from "react-icons/hi2";
 
 import {
     approvePostApi,
     getPendingPostsApi,
     rejectPostApi,
+    adminDeletePostApi,
 } from "../../api/adminApi";
 
 import { Notify } from "../../utils/notify";
@@ -61,6 +63,20 @@ function AdminPosts() {
         }
     };
 
+    const handleDelete = async (postId) => {
+        const ok = window.confirm("Bạn có chắc muốn xóa bài đăng này không?");
+        if (!ok) return;
+
+        try {
+            await adminDeletePostApi(postId);
+            Notify.success("Đã xóa bài đăng");
+
+            setPosts((prev) => prev.filter((post) => post.id !== postId));
+        } catch (err) {
+            Notify.error(err.response?.data?.detail || "Xóa bài đăng thất bại");
+        }
+    };
+
     return (
         <div className="admin-posts-page">
             <div className="admin-page-header">
@@ -101,6 +117,12 @@ function AdminPosts() {
                                 {post.description}
                             </p>
 
+                            {post.image_url && (
+                                <div className="admin-post-image">
+                                    <img src={post.image_url} alt={post.title} />
+                                </div>
+                            )}
+
                             <div className="admin-post-meta">
                                 <span>
                                     <HiTag />
@@ -129,6 +151,13 @@ function AdminPosts() {
                             </div>
 
                             <div className="admin-post-actions">
+                                <button
+                                    className="admin-delete-btn"
+                                    onClick={() => handleDelete(post.id)}
+                                >
+                                    <HiTrash />
+                                    Xóa bài
+                                </button>
                                 <button
                                     className="approve-btn"
                                     onClick={() => handleApprove(post.id)}

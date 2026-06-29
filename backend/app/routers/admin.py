@@ -13,6 +13,8 @@ from app.services.admin_service import (
     get_pending_posts,
     reject_post,
 )
+from app.models.post import Post
+from app.schemas.auth import MessageResponse
 
 router = APIRouter(
     prefix="/admin",
@@ -53,6 +55,30 @@ def reject_existing_post(
     current_admin: User = Depends(get_current_admin),
 ):
     return reject_post(db, post_id)
+
+@router.delete(
+    "/posts/{post_id}",
+    response_model=MessageResponse,
+)
+def admin_delete_post(
+    post_id: int,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin),
+):
+    post = db.get(Post, post_id)
+
+    if not post:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Post not found",
+        )
+
+    db.delete(post)
+    db.commit()
+
+    return MessageResponse(
+        message="Delete post successfully",
+    )
 
 
 @router.get(

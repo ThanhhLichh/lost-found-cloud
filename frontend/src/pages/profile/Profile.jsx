@@ -354,7 +354,11 @@ function Profile() {
                                 </div>
 
                                 <p className="my-post-desc">{post.description}</p>
-
+                                {post.image_url && (
+                                    <div className="my-post-image">
+                                        <img src={post.image_url} alt={post.title} />
+                                    </div>
+                                )}
                                 <div className="my-post-meta">
                                     <span>
                                         <HiTag />
