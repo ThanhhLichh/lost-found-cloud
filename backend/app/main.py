@@ -8,6 +8,7 @@ from app.routers.categories import router as categories_router
 from app.routers.posts import router as posts_router
 from app.routers.admin import router as admin_router
 from app.routers.users import router as users_router
+from app.routers.uploads import router as uploads_router
 
 app = FastAPI(
     title="Lost & Found API",
@@ -30,6 +31,7 @@ app.include_router(categories_router)
 app.include_router(posts_router)
 app.include_router(admin_router)
 app.include_router(users_router)
+app.include_router(uploads_router)
 
 
 @app.on_event("startup")

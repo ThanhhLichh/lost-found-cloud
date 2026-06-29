@@ -22,6 +22,7 @@ import {
     updatePostApi,
     updatePostStatusApi,
 } from "../../api/postApi";
+import { uploadImageApi } from "../../api/uploadApi";
 
 import { useAuth } from "../../context/AuthContext";
 import "./AppHome.css";
@@ -41,7 +42,7 @@ function AppHome() {
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const observerRef = useRef(null);
-
+    const [uploadingImage, setUploadingImage] = useState(false);
     const [searchParams, setSearchParams] = useSearchParams();
     const [openMenuPostId, setOpenMenuPostId] = useState(null);
 
@@ -95,6 +96,29 @@ function AppHome() {
             Notify.error("Không tải được danh sách bài đăng");
         } finally {
             setLoadingPosts(false);
+        }
+    };
+
+    const handleSelectImage = async (e) => {
+        const file = e.target.files?.[0];
+
+        if (!file) return;
+
+        try {
+            setUploadingImage(true);
+
+            const res = await uploadImageApi(file);
+
+            setPostForm((prev) => ({
+                ...prev,
+                image_url: res.data.image_url,
+            }));
+
+            Notify.success("Tải ảnh lên thành công");
+        } catch {
+            Notify.error("Tải ảnh lên thất bại");
+        } finally {
+            setUploadingImage(false);
         }
     };
 
@@ -316,7 +340,7 @@ const validatePostForm = () => {
             await createPostApi({
                 ...postForm,
                 category_id: Number(postForm.category_id),
-                image_url: null,
+                image_url: postForm.image_url,
             });
 
             Notify.info(
@@ -470,7 +494,18 @@ const validatePostForm = () => {
 
                         <h2>{post.title}</h2>
 
-                        <p className="post-description">{post.description}</p>
+                        <p className="post-description">
+                            {post.description}
+                        </p>
+
+                        {post.image_url && (
+                            <div className="post-image">
+                                <img
+                                    src={post.image_url}
+                                    alt={post.title}
+                                />
+                            </div>
+                        )}
 
                         <div className="post-meta">
                             <span className="meta-category">
@@ -550,6 +585,8 @@ const validatePostForm = () => {
                     onChange={handlePostFormChange}
                     onSubmit={handleCreatePost}
                     onClose={() => setShowCreateModal(false)}
+                    onSelectImage={handleSelectImage}
+                    uploading={uploadingImage}
                 />
             )}
         </div>

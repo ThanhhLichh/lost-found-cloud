@@ -9,6 +9,8 @@ function CreatePostModal({
     onChange,
     onSubmit,
     onClose,
+    onSelectImage,
+    uploading,
 }) {
     return (
         <div className="create-modal-overlay">
@@ -114,10 +116,22 @@ function CreatePostModal({
                             <label>Hình ảnh món đồ</label>
                             <label className="upload-box">
                                 <HiPhoto />
-                                <span>Chọn ảnh từ thiết bị</span>
+                               <span>
+                                        {uploading ? "Đang tải ảnh lên..." : "Chọn ảnh từ thiết bị"}
+                                    </span>
                                 <small>PNG, JPG, JPEG</small>
-                                <input type="file" accept="image/*" hidden />
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    hidden
+                                    onChange={onSelectImage}
+                                />
                             </label>
+                            {postForm.image_url && (
+                                <div className="image-preview">
+                                    <img src={postForm.image_url} alt="Preview" />
+                                </div>
+                            )}
                         </div>
                     </div>
 
