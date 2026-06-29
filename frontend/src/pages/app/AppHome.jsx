@@ -24,13 +24,14 @@ import {
 } from "../../api/postApi";
 import { uploadImageApi } from "../../api/uploadApi";
 import { adminDeletePostApi } from "../../api/adminApi";
-
+import { useFilter } from "../../context/FilterContext";
 import { useAuth } from "../../context/AuthContext";
 import "./AppHome.css";
 import { Notify } from "../../utils/notify";
 import { getCategoriesApi } from "../../api/categoryApi";
 import CreatePostModal from "../../components/feed/CreatePostModal";
 import PostSkeleton from "../../components/feed/PostSkeleton";
+import { useLoading } from "../../context/LoadingContext";
 
 function AppHome() {
     const { user } = useAuth();
@@ -39,13 +40,14 @@ function AppHome() {
     const [posts, setPosts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loadingPosts, setLoadingPosts] = useState(false);
-
+    const { selectedCategory } = useFilter();
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const observerRef = useRef(null);
     const [uploadingImage, setUploadingImage] = useState(false);
     const [searchParams, setSearchParams] = useSearchParams();
     const [openMenuPostId, setOpenMenuPostId] = useState(null);
+    const { showLoading, hideLoading } = useLoading();
 
     const [editingPost, setEditingPost] = useState(null);
     const [editForm, setEditForm] = useState({
@@ -81,6 +83,7 @@ function AppHome() {
             const res = await getPostsApi({
                 page: pageToLoad,
                 limit: 10,
+                category_id: selectedCategory,
             });
 
             const newPosts = res.data;
@@ -88,7 +91,14 @@ function AppHome() {
             if (isReset) {
                 setPosts(newPosts);
             } else {
-                setPosts((prev) => [...prev, ...newPosts]);
+                setPosts((prev) => {
+                    const ids = new Set(prev.map((item) => item.id));
+
+                    return [
+                        ...prev,
+                        ...newPosts.filter((item) => !ids.has(item.id)),
+                    ];
+                });
             }
 
             setHasMore(newPosts.length === 10);
@@ -158,7 +168,7 @@ function AppHome() {
 
     const handleUpdatePost = async (e) => {
         e.preventDefault();
-
+        showLoading();
         try {
             await updatePostApi(editingPost.id, {
                 ...editForm,
@@ -175,13 +185,15 @@ function AppHome() {
             );
         } catch (err) {
             Notify.error(err.response?.data?.detail || "Cập nhật bài đăng thất bại");
+        } finally {
+            hideLoading();
         }
     };
 
     const handleDeletePost = async (postId) => {
         const ok = window.confirm("Bạn có chắc muốn xóa bài đăng này không?");
         if (!ok) return;
-
+        showLoading();
         try {
             await deletePostApi(postId);
 
@@ -191,6 +203,9 @@ function AppHome() {
             setPosts((prev) => prev.filter((post) => post.id !== postId));
         } catch (err) {
             Notify.error(err.response?.data?.detail || "Xóa bài đăng thất bại");
+        }
+          finally {
+            hideLoading();
         }
     };
 
@@ -203,7 +218,8 @@ function AppHome() {
                 : post.status === "WAITING_OWNER"
                 ? "RETURNED"
                 : "WAITING_OWNER";
-
+        
+                showLoading();
         try {
             await updatePostStatusApi(post.id, newStatus);
 
@@ -220,6 +236,8 @@ function AppHome() {
             );
         } catch (err) {
             Notify.error(err.response?.data?.detail || "Cập nhật trạng thái thất bại");
+        } finally {
+            hideLoading();
         }
     };
 
@@ -238,7 +256,7 @@ const handleAdminDeletePost = async (postId) => {
     );
 
     if (!ok) return;
-
+    showLoading();
     try {
         await adminDeletePostApi(postId);
 
@@ -256,6 +274,9 @@ const handleAdminDeletePost = async (postId) => {
             "Xóa bài đăng thất bại"
         );
     }
+        finally {
+        hideLoading();
+    }
 };
 
 useEffect(() => {
@@ -266,9 +287,15 @@ useEffect(() => {
 }, [searchParams, setSearchParams]);
 
 useEffect(() => {
-    loadPosts(1, true);
     loadCategories();
 }, []);
+
+useEffect(() => {
+    setPage(1);
+    setHasMore(true);
+    setPosts([]);
+    loadPosts(1, true);
+}, [selectedCategory]);
 
 useEffect(() => {
     setPostForm((prev) => ({
@@ -363,6 +390,8 @@ const validatePostForm = () => {
 
         if (!validatePostForm()) return;
 
+        showLoading();
+
         try {
             await createPostApi({
                 ...postForm,
@@ -393,6 +422,9 @@ const validatePostForm = () => {
 
         } catch (err) {
             Notify.error(err.response?.data?.detail || "Đăng bài thất bại");
+        }
+        finally {
+            hideLoading();
         }
     };
 
@@ -495,7 +527,13 @@ const validatePostForm = () => {
                                                     <>
                                                         <button onClick={() => handleUpdateStatus(post)}>
                                                             <HiCheckCircle />
-                                                            ...
+                                                            {post.type === "LOST"
+                                                                ? post.status === "SEARCHING"
+                                                                    ? "Đã tìm thấy"
+                                                                    : "Đang tìm"
+                                                                : post.status === "WAITING_OWNER"
+                                                                ? "Đã trả lại"
+                                                                : "Chờ chủ nhận"}
                                                         </button>
 
                                                         <button onClick={() => openEditPostModal(post)}>

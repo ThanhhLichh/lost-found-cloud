@@ -1,0 +1,33 @@
+.global-loading-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(5px);
+    display: grid;
+    place-items: center;
+}
+
+.global-loading-box {
+    min-width: 170px;
+    padding: 20px 24px;
+    border-radius: 20px;
+    background: white;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.18);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--primary);
+    font-weight: 800;
+}
+
+.global-loading-box svg {
+    font-size: 28px;
+    animation: loading-spin 0.9s linear infinite;
+}
+
+@keyframes loading-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

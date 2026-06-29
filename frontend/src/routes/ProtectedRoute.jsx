@@ -5,7 +5,7 @@ function ProtectedRoute({ children }) {
     const { isAuthenticated, loadingUser } = useAuth();
 
     if (loadingUser) {
-        return <div>Đang tải...</div>;
+        return null;
     }
 
     if (!isAuthenticated) {

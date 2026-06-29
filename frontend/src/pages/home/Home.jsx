@@ -9,6 +9,7 @@ import heroBag from "../../assets/landing/hero-bag.jpg";
 import heroCard from "../../assets/landing/hero-card.jpg";
 import heroKeys from "../../assets/landing/hero-keys.jpg";
 import heroWatch from "../../assets/landing/hero-watch.jpg";
+import { useLoading } from "../../context/LoadingContext";
 
 import {
     HiUsers,
@@ -45,6 +46,7 @@ function Home() {
     const [activeHero, setActiveHero] = useState(0);
     const navigate = useNavigate();
     const { loadCurrentUser } = useAuth();
+    const { showLoading, hideLoading } = useLoading();
 
     const [loginForm, setLoginForm] = useState({
         email: "",
@@ -160,12 +162,12 @@ const validateLoginForm = () => {
             [e.target.name]: e.target.value,
         });
     };
-
     const handleLoginSubmit = async (e) => {
         e.preventDefault();
         if (!validateLoginForm()) return;
-        setError("");
+
         setLoading(true);
+        showLoading();
 
         try {
             const res = await loginApi(loginForm);
@@ -173,18 +175,15 @@ const validateLoginForm = () => {
             localStorage.setItem("access_token", res.data.access_token);
             localStorage.setItem("refresh_token", res.data.refresh_token);
 
-            
             await loadCurrentUser();
+
             toast.success("Đăng nhập thành công ✔");
             setAuthModal(null);
             navigate("/app");
-
-            // Sau này có trang chính thì đổi thành navigate("/app")
         } catch (err) {
-            toast.error(
-                err.response?.data?.detail || "Đăng nhập thất bại !"
-            );
+            toast.error(err.response?.data?.detail || "Đăng nhập thất bại !");
         } finally {
+            hideLoading();
             setLoading(false);
         }
     };
@@ -192,21 +191,19 @@ const validateLoginForm = () => {
     const handleRegisterSubmit = async (e) => {
         e.preventDefault();
         if (!validateRegisterForm()) return;
-        setError("");
+
         setLoading(true);
+        showLoading();
 
         try {
             await registerApi(registerForm);
 
-            toast.success(
-                "Đăng ký thành công. Hãy đăng nhập."
-            );
+            toast.success("Đăng ký thành công. Hãy đăng nhập.");
             setAuthModal("login");
         } catch (err) {
-            toast.error(
-                err.response?.data?.detail || "Đăng ký thất bại"
-            );
+            toast.error(err.response?.data?.detail || "Đăng ký thất bại");
         } finally {
+            hideLoading();
             setLoading(false);
         }
     };

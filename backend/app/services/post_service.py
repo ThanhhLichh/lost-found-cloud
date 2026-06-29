@@ -75,6 +75,7 @@ def get_posts(
     limit: int = 10,
     keyword: str | None = None,
     post_type: PostType | None = None,
+    category_id: int | None = None,
     approval_status: ApprovalStatus | None = ApprovalStatus.APPROVED,
 ) -> list[Post]:
     query = select(Post).options(
@@ -87,6 +88,9 @@ def get_posts(
 
     if post_type:
         query = query.where(Post.type == post_type)
+
+    if category_id:
+        query = query.where(Post.category_id == category_id)
 
     if keyword:
         keyword_like = f"%{keyword}%"

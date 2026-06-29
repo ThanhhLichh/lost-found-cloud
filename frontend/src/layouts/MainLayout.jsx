@@ -14,14 +14,20 @@ import {
     HiArchiveBox,
 } from "react-icons/hi2";
 
+import { getCategoriesApi } from "../api/categoryApi";
+import { useFilter } from "../context/FilterContext";
 import { getRankingApi } from "../api/postApi";
 import { useAuth } from "../context/AuthContext";
 import logo from "../assets/landing/logo.png";
 import "./MainLayout.css";
+import { useLoading } from "../context/LoadingContext";
 
 function MainLayout() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const [categories, setCategories] = useState([]);
+    const { selectedCategory, setSelectedCategory } = useFilter();
+    const { showLoading, hideLoading } = useLoading();
 
     const location = useLocation();
 
@@ -43,6 +49,16 @@ function MainLayout() {
         navigate("/app?createPost=1");
     };
 
+    const handleNavigateWithLoading = (path) => {
+        showLoading();
+
+        navigate(path);
+
+        setTimeout(() => {
+            hideLoading();
+        }, 450);
+    };
+
     const handleLogout = () => {
         logout();
         navigate("/");
@@ -50,6 +66,19 @@ function MainLayout() {
 
     useEffect(() => {
         loadRanking();
+    }, []);
+
+    useEffect(() => {
+        const loadCategories = async () => {
+            try {
+                const res = await getCategoriesApi();
+                setCategories(res.data);
+            } catch {
+                setCategories([]);
+            }
+        };
+
+        loadCategories();
     }, []);
 
 
@@ -65,7 +94,15 @@ function MainLayout() {
                 </div>
 
                 <nav className="navbar-center">
-                    <NavLink to="/app" end title="Trang chủ">
+                    <NavLink
+                        to="/app"
+                        end
+                        title="Trang chủ"
+                        onClick={() => {
+                            showLoading();
+                            setTimeout(hideLoading, 450);
+                        }}
+                    >
                         <HiHome />
                     </NavLink>
 
@@ -79,7 +116,14 @@ function MainLayout() {
                     </button>
 
                     {user?.role !== "ADMIN" && (
-                        <NavLink to="/app/profile" title="Trang cá nhân">
+                        <NavLink
+                            to="/app/profile"
+                            title="Trang cá nhân"
+                            onClick={() => {
+                                showLoading();
+                                setTimeout(hideLoading, 450);
+                            }}
+                        >
                             <HiUser />
                         </NavLink>
                     )}
@@ -98,7 +142,14 @@ function MainLayout() {
                         </div>
                     </div>
 
-                    <button className="navbar-logout" onClick={handleLogout}>
+                    <button
+                        className="navbar-logout"
+                        onClick={() => {
+                            showLoading();
+                            handleLogout();
+                            setTimeout(hideLoading, 450);
+                        }}
+                    >
                         <HiArrowRightOnRectangle />
                         <span>Đăng xuất</span>
                     </button>
@@ -108,7 +159,12 @@ function MainLayout() {
             <div className="app-body">
                 <aside className="left-sidebar">
                     <nav className="side-menu">
-                        <NavLink to="/app" end>
+                        <NavLink to="/app"
+                         end 
+                         onClick={() => {
+                            showLoading();
+                            setTimeout(hideLoading, 450);
+                        }}>
                             <HiHome />
                             <span>Trang chủ</span>
                         </NavLink>
@@ -123,7 +179,12 @@ function MainLayout() {
                         </button>
 
                         {user?.role !== "ADMIN" && (
-                            <NavLink to="/app/profile">
+                            <NavLink to="/app/profile"
+                            onClick={() => {
+                            showLoading();
+                            setTimeout(hideLoading, 450);
+                        }}>
+                                
                                 <HiUser />
                                 <span>Trang cá nhân</span>
                             </NavLink>
@@ -153,10 +214,19 @@ function MainLayout() {
                         <div className="support-icon">
                             <HiEnvelope />
                         </div>
+
                         <div>
                             <h4>Cần hỗ trợ?</h4>
                             <p>Liên hệ nhóm quản trị để được hỗ trợ nhanh.</p>
-                            <button>Gửi email</button>
+
+                            <button
+                                onClick={() =>
+                                    window.location.href =
+                                        "mailto:buithanhlich931@gmail.com?subject=Hỗ trợ Lost & Found Cloud&body=Xin chào Admin,%0D%0A%0D%0ATôi cần hỗ trợ về:%0D%0A%0D%0AMô tả vấn đề:%0D%0A"
+                                }
+                            >
+                                Gửi email
+                            </button>
                         </div>
                     </div>
                 </aside>
@@ -213,33 +283,36 @@ function MainLayout() {
                     <section className="filter-card">
                         <div className="sidebar-section-title">
                             <HiFunnel />
-                            <h3>Bộ lọc</h3>
+                            <h3>Bộ lọc bài đăng</h3>
                         </div>
 
-                        <button className="filter-item active">
-                            <HiTag />
-                            Tất cả danh mục
-                        </button>
+                        <button
+                                className={`filter-item ${selectedCategory === null ? "active" : ""}`}
+                                onClick={() => {
+                                    showLoading();
+                                    setSelectedCategory(null)
+                                    setTimeout(hideLoading, 450);}}
+                            >
+                                <HiTag />
+                                Tất cả danh mục
+                            </button>
 
-                        <button className="filter-item">
-                            <HiTag />
-                            Điện thoại
-                        </button>
-
-                        <button className="filter-item">
-                            <HiTag />
-                            Balo
-                        </button>
-
-                        <button className="filter-item">
-                            <HiTag />
-                            Chìa khóa
-                        </button>
-
-                        <button className="filter-item">
-                            <HiMapPin />
-                            Gần đây
-                        </button>
+                            {categories.map((category) => (
+                                <button
+                                    key={category.id}
+                                    className={`filter-item ${
+                                        selectedCategory === category.id ? "active" : ""
+                                    }`}
+                                    onClick={() => {
+                                    showLoading();
+                                    setSelectedCategory(category.id);
+                                    setTimeout(hideLoading, 450);
+                                }}
+                                >
+                                    <HiTag />
+                                    {category.name}
+                                </button>
+                            ))}
                     </section>
 
                     

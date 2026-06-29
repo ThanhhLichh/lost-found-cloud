@@ -17,4 +17,58 @@ axiosClient.interceptors.request.use((config) => {
     return config;
 });
 
+axiosClient.interceptors.response.use(
+    (response) => response,
+
+    async (error) => {
+        const originalRequest = error.config;
+
+        if (
+            error.response?.status === 401 &&
+            !originalRequest._retry
+        ) {
+            originalRequest._retry = true;
+
+            try {
+                const refreshToken = localStorage.getItem("refresh_token");
+
+                if (!refreshToken) {
+                    throw new Error("No refresh token");
+                }
+
+                const res = await axios.post(
+                    `${import.meta.env.VITE_API_URL}/auth/refresh`,
+                    {
+                        refresh_token: refreshToken,
+                    }
+                );
+
+                localStorage.setItem(
+                    "access_token",
+                    res.data.access_token
+                );
+
+                localStorage.setItem(
+                    "refresh_token",
+                    res.data.refresh_token
+                );
+
+                originalRequest.headers.Authorization =
+                    `Bearer ${res.data.access_token}`;
+
+                return axiosClient(originalRequest);
+            } catch (err) {
+                localStorage.removeItem("access_token");
+                localStorage.removeItem("refresh_token");
+
+                window.location.href = "/";
+
+                return Promise.reject(err);
+            }
+        }
+
+        return Promise.reject(error);
+    }
+);
+
 export default axiosClient;

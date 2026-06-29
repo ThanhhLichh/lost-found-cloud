@@ -1,12 +1,19 @@
 import axiosClient from "./axiosClient";
 
-export const getPostsApi = ({ page = 1, limit = 10, post_type, keyword } = {}) => {
+export const getPostsApi = ({
+    page = 1,
+    limit = 10,
+    post_type,
+    keyword,
+    category_id,
+} = {}) => {
     return axiosClient.get("/posts", {
         params: {
             page,
             limit,
             post_type: post_type || undefined,
             keyword: keyword || undefined,
+            category_id: category_id || undefined,
         },
     });
 };

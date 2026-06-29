@@ -56,6 +56,7 @@ def get_post_feed(
     limit: int = Query(default=10, ge=1, le=50),
     keyword: str | None = None,
     post_type: PostType | None = None,
+    category_id: int | None = None,
     db: Session = Depends(get_db),
 ):
     return get_posts(
@@ -64,6 +65,7 @@ def get_post_feed(
         limit=limit,
         keyword=keyword,
         post_type=post_type,
+        category_id=category_id,
         approval_status=ApprovalStatus.APPROVED,
     )
 

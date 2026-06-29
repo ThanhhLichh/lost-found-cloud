@@ -77,7 +77,7 @@ def login(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password",
+            detail="Sai email hoặc mật khẩu",
         )
 
     if not verify_password(
@@ -86,7 +86,7 @@ def login(
     ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password",
+            detail="Sai email hoặc mật khẩu",
         )
 
     access_token = create_access_token(

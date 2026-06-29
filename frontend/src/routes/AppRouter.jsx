@@ -8,18 +8,24 @@ import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminPosts from "../pages/admin/AdminPosts";
 import AdminUsers from "../pages/admin/AdminUsers";
 import Profile from "../pages/profile/Profile";
+import { FilterProvider } from "../context/FilterContext";
+import { LoadingProvider } from "../context/LoadingContext";
+import GlobalLoading from "../components/common/GlobalLoading";
 
 function AppRouter() {
     return (
         <BrowserRouter>
+        <LoadingProvider>
+            <GlobalLoading />
             <Routes>
                 <Route path="/" element={<Home />} />
-
                 <Route
                     path="/app"
                     element={
                         <ProtectedRoute>
-                            <MainLayout />
+                            <FilterProvider>
+                                <MainLayout />
+                            </FilterProvider>
                         </ProtectedRoute>
                     }
                 >
@@ -30,6 +36,7 @@ function AppRouter() {
                     <Route path="admin/users" element={<AdminUsers />} />
                 </Route>
             </Routes>
+        </LoadingProvider>
         </BrowserRouter>
     );
 }
