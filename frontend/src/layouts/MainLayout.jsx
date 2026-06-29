@@ -243,7 +243,7 @@ function MainLayout() {
                         <HiTrophy />
                     </div>
                     <div>
-                        <h3>Bảng xếp hạng</h3>
+                        <h3>Bảng vinh danh</h3>
                         <p>Những người trả đồ tích cực nhất</p>
                     </div>
                 </div>

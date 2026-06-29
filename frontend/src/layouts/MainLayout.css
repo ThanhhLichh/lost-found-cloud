@@ -131,8 +131,22 @@
 .right-sidebar {
     position: sticky;
     top: 96px;
-    height: calc(100vh - 110px);
+    max-height: calc(100vh - 110px);
     padding: 24px 0;
+}
+
+.right-sidebar {
+    overflow-y: auto;
+    padding-right: 20px;
+}
+
+.right-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.right-sidebar::-webkit-scrollbar-thumb {
+    background: #cfe3d8;
+    border-radius: 999px;
 }
 
 .left-sidebar {
@@ -484,7 +498,8 @@
         grid-template-columns: 260px 1fr 280px;
     }
 
-    .navbar-center a {
+    .navbar-center a,
+    .navbar-icon-button {
         width: 64px;
     }
 
@@ -493,7 +508,16 @@
     }
 
     .right-sidebar {
-        display: none;
+        display: grid;
+        grid-column: 1 / -1;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+
+        position: static;
+        height: auto;
+        padding: 0 20px 30px;
+        overflow: visible;
+        max-height: none;
     }
 }
 
