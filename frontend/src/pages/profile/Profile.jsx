@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
     HiEnvelope,
     HiPhone,
@@ -12,6 +12,7 @@ import {
     HiClock,
     HiXCircle,
     HiEye,
+    HiCamera,
 } from "react-icons/hi2";
 
 import { useAuth } from "../../context/AuthContext";
@@ -22,12 +23,48 @@ import {
     updatePostApi,
     updatePostStatusApi,
 } from "../../api/postApi";
-import { changePasswordApi, updateProfileApi } from "../../api/userApi";
+import { changePasswordApi, updateProfileApi, updateAvatarApi, deleteAvatarApi } from "../../api/userApi";
+import { uploadAvatarApi } from "../../api/uploadApi";
 import { Notify } from "../../utils/notify";
 import "./Profile.css";
 
 function Profile() {
     const { user, setUser } = useAuth();
+
+
+    const fileInputRef = useRef(null);
+    const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+    const handleAvatarChange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (!file.type.startsWith("image/")) {
+            Notify.error("Vui lòng chọn file hình ảnh");
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) { 
+            Notify.error("Kích thước ảnh tối đa là 5MB");
+            return;
+        }
+
+        try {
+            setUploadingAvatar(true);
+            const uploadRes = await uploadAvatarApi(file);
+            const newAvatarUrl = uploadRes.data.image_url;
+
+            const res = await updateAvatarApi({ avatar_url: newAvatarUrl });
+            
+            setUser(res.data);
+            Notify.success("Cập nhật ảnh đại diện thành công");
+        } catch (err) {
+            Notify.error("Có lỗi xảy ra khi cập nhật ảnh đại diện");
+        } finally {
+            setUploadingAvatar(false);
+            if(fileInputRef.current) fileInputRef.current.value = "";
+        }
+    };
+   
 
     const [posts, setPosts] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -84,13 +121,13 @@ function Profile() {
     };
 
     const handlePasswordChange = (e) => {
-    const { name, value } = e.target;
+        const { name, value } = e.target;
 
-    setPasswordForm((prev) => ({
-        ...prev,
-        [name]: value,
-    }));
-};
+        setPasswordForm((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
 
     const handleChangePassword = async (e) => {
         e.preventDefault();
@@ -133,13 +170,13 @@ function Profile() {
     }, [user]);
 
     const handleProfileChange = (e) => {
-    const { name, value } = e.target;
+        const { name, value } = e.target;
 
-    setProfileForm((prev) => ({
-        ...prev,
-        [name]: value,
-    }));
-};
+        setProfileForm((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
 
     const handleUpdateProfile = async (e) => {
         e.preventDefault();
@@ -176,31 +213,31 @@ function Profile() {
     };
 
     const handleUpdateStatus = async (post) => {
-    const newStatus =
-        post.type === "LOST"
-            ? post.status === "SEARCHING"
-                ? "FOUND"
-                : "SEARCHING"
-            : post.status === "WAITING_OWNER"
-            ? "RETURNED"
-            : "WAITING_OWNER";
+        const newStatus =
+            post.type === "LOST"
+                ? post.status === "SEARCHING"
+                    ? "FOUND"
+                    : "SEARCHING"
+                : post.status === "WAITING_OWNER"
+                ? "RETURNED"
+                : "WAITING_OWNER";
 
-    try {
-        await updatePostStatusApi(post.id, newStatus);
+        try {
+            await updatePostStatusApi(post.id, newStatus);
 
-        Notify.success("Cập nhật trạng thái thành công");
+            Notify.success("Cập nhật trạng thái thành công");
 
-        setPosts((prev) =>
-            prev.map((item) =>
-                item.id === post.id
-                    ? { ...item, status: newStatus }
-                    : item
-            )
-        );
-    } catch (err) {
-        Notify.error(err.response?.data?.detail || "Cập nhật trạng thái thất bại");
-    }
-};
+            setPosts((prev) =>
+                prev.map((item) =>
+                    item.id === post.id
+                        ? { ...item, status: newStatus }
+                        : item
+                )
+            );
+        } catch (err) {
+            Notify.error(err.response?.data?.detail || "Cập nhật trạng thái thất bại");
+        }
+    };
     const closeEditModal = () => {
         setEditingPost(null);
     };
@@ -268,10 +305,51 @@ function Profile() {
     return (
         <div className="profile-page">
             <section className="profile-card">
-                <div className="profile-avatar">
-                    {user?.full_name?.charAt(0) || "U"}
-                </div>
+                
+                
+                <div className="profile-avatar-wrapper">
+    <div className="profile-avatar" onClick={() => !uploadingAvatar && fileInputRef.current?.click()}>
+    {user?.avatar_url && user.avatar_url.trim() !== "" ? (
+        <img src={user.avatar_url} alt="Avatar" className="avatar-image" />
+    ) : (
+        <span>{user?.full_name?.charAt(0) || "U"}</span>
+    )}
+</div>
+    
+    
+    <div className="avatar-overlay" onClick={() => !uploadingAvatar && fileInputRef.current?.click()}>
+        {uploadingAvatar ? "Đang tải..." : <HiCamera size={24}/>}
+    </div>
 
+    
+    {user?.avatar_url && !uploadingAvatar && (
+        <button 
+            className="avatar-delete-btn" 
+           onClick={async () => {
+    if(window.confirm("Bạn muốn xóa ảnh đại diện?")) {
+        try {
+            const res = await deleteAvatarApi(); 
+            setUser(res.data);
+            Notify.success("Đã xóa ảnh đại diện");
+        } catch (err) {
+            console.error(err);
+            Notify.error("Xóa thất bại");
+        }
+    }
+}}
+        >
+            <HiTrash />
+        </button>
+    )}
+
+    <input 
+        type="file" 
+        ref={fileInputRef} 
+        onChange={handleAvatarChange} 
+        accept="image/*" 
+        style={{ display: "none" }} 
+    />
+</div>
                 <div className="profile-info">
                     <h1>{user?.full_name}</h1>
                     <p>
