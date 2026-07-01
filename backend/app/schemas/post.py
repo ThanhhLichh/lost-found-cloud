@@ -8,6 +8,7 @@ from app.models.enums import ApprovalStatus, PostType
 class PostUserResponse(BaseModel):
     id: int
     full_name: str
+    avatar_url: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

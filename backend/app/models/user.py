@@ -32,6 +32,8 @@ class User(Base):
         nullable=False,
     )
 
+    avatar_url: Mapped[str] = mapped_column(String(500), nullable=True)
+
     role: Mapped[UserRole] = mapped_column(
         Enum(UserRole),
         default=UserRole.USER,

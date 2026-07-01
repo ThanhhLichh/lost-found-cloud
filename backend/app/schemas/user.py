@@ -10,6 +10,7 @@ class UserResponse(BaseModel):
     full_name: str
     email: str
     phone: str
+    avatar_url: str | None = None
     role: UserRole
     status: UserStatus
     created_at: datetime
@@ -26,3 +27,6 @@ class UpdateProfileRequest(BaseModel):
 class ChangePasswordRequest(BaseModel):
     old_password: str = Field(min_length=6)
     new_password: str = Field(min_length=6)
+
+class UpdateAvatarRequest(BaseModel):
+    avatar_url: str    
