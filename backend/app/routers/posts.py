@@ -114,11 +114,12 @@ def get_post_ranking(
         select(
             User.id,
             User.full_name,
+            User.avatar_url,
             func.count(Post.id).label("returned_count"),
         )
         .join(Post, Post.user_id == User.id)
         .where(Post.status == "RETURNED")
-        .group_by(User.id, User.full_name)
+        .group_by(User.id, User.full_name, User.avatar_url)
         .order_by(func.count(Post.id).desc())
         .limit(5)
     ).all()
@@ -127,6 +128,7 @@ def get_post_ranking(
         {
             "user_id": row.id,
             "full_name": row.full_name,
+            "avatar_url": row.avatar_url,
             "returned_count": row.returned_count,
         }
         for row in result

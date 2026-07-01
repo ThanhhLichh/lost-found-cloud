@@ -7,9 +7,10 @@ from app.models.user import User
 from app.schemas.user import (
     ChangePasswordRequest,
     UpdateProfileRequest,
+    UpdateAvatarRequest,
     UserResponse,
 )
-from app.services.user_service import change_password, update_profile
+from app.services.user_service import change_password, update_profile, update_avatar
 
 router = APIRouter(
     prefix="/users",
@@ -49,3 +50,29 @@ def change_my_password(
         request.old_password,
         request.new_password,
     )
+
+@router.put(
+    "/me/avatar",
+    response_model=UserResponse,
+)
+def update_my_avatar(
+    request: UpdateAvatarRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    
+    return update_avatar(
+        db,
+        current_user,
+        request.avatar_url,
+    )
+
+@router.delete("/me/avatar", response_model=UserResponse)
+def delete_my_avatar(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    current_user.avatar_url = None
+    db.commit()
+    db.refresh(current_user)
+    return current_user

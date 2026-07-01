@@ -15,8 +15,18 @@ def upload_image(
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_active_user),
 ):
-    image_url = upload_image_to_gcs(file)
+    image_url = upload_image_to_gcs(file, folder="posts")
 
+    return {
+        "image_url": image_url,
+    }
+
+@router.post("/avatar")
+def upload_avatar(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_active_user),
+):
+    image_url = upload_image_to_gcs(file, folder="avatars")
     return {
         "image_url": image_url,
     }

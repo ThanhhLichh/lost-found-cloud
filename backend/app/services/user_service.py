@@ -81,3 +81,13 @@ def change_password(
     db.refresh(current_user)
 
     return current_user
+
+def update_avatar(
+    db: Session,
+    current_user: User,
+    avatar_url: str,
+) -> User:
+    current_user.avatar_url = avatar_url
+    db.commit()
+    db.refresh(current_user)
+    return current_user
