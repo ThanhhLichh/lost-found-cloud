@@ -134,8 +134,12 @@ function MainLayout() {
                 <div className="navbar-right">
                     <div className="navbar-user">
                         <div className="navbar-avatar">
-                            {user?.full_name?.charAt(0) || "U"}
-                        </div>
+    {user?.avatar_url ? (
+        <img src={user.avatar_url} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}/>
+    ) : (
+        user?.full_name?.charAt(0) || "U"
+    )}
+</div>
                         <div>
                             <strong>{user?.full_name}</strong>
                             <span>{user?.role}</span>
@@ -266,9 +270,19 @@ function MainLayout() {
                         >
                             <span className="rank-number">{index + 1}</span>
 
-                            <div className="rank-avatar">
-                                {item.full_name?.charAt(0) || "U"}
-                            </div>
+<div className="rank-avatar">
+    {item.avatar_url && item.avatar_url.trim() !== "" ? (
+        <img 
+            src={item.avatar_url} 
+            alt="Avatar" 
+            className="avatar-circle" 
+        />
+    ) : (
+        <div className="avatar-fallback">
+            {item.full_name?.charAt(0) || "U"}
+        </div>
+    )}
+</div>
 
                             <div className="rank-info">
                                 <strong>{item.full_name}</strong>

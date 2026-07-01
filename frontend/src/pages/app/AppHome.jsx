@@ -432,8 +432,12 @@ const validatePostForm = () => {
         <div className="feed-page">
             <div className="feed-composer">
                 <div className="composer-avatar">
-                    {user?.full_name?.charAt(0) || "U"}
-                </div>
+    {user?.avatar_url && user.avatar_url.trim() !== "" ? (
+        <img src={user.avatar_url} alt="Avatar" />
+    ) : (
+        user?.full_name?.charAt(0) || "U"
+    )}
+</div>
 
                 <button
                     className="composer-input"
@@ -480,8 +484,12 @@ const validatePostForm = () => {
                             >
                         <div className="post-header">
                             <div className="post-avatar">
-                                {post.user?.full_name?.charAt(0) || "U"}
-                            </div>
+    {post.user?.avatar_url && post.user.avatar_url.trim() !== "" ? (
+        <img src={post.user.avatar_url} alt={post.user.full_name} />
+    ) : (
+        post.user?.full_name?.charAt(0) || "U"
+    )}
+</div>
 
                             <div>
                                 <h3>{post.user?.full_name || "Người dùng"}</h3>

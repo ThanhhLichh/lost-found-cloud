@@ -80,11 +80,20 @@
     width: 42px;
     height: 42px;
     border-radius: 50%;
+    overflow: hidden; 
     background: var(--primary);
     color: white;
-    display: grid;
-    place-items: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-weight: 900;
+    font-size: 20px;
+}
+
+.navbar-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .navbar-user strong {
@@ -381,11 +390,32 @@
     width: 44px;
     height: 44px;
     border-radius: 50%;
+    overflow: hidden;   
+    position: relative; 
     background: #e6f6ed;
-    color: var(--primary);
-    display: grid;
-    place-items: center;
-    font-weight: 800;
+    display: flex;     
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.rank-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;  
+    display: block;
+}
+
+.avatar-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    background-color: var(--primary); 
+    color: white;                     
+    font-size: 20px;                  
 }
 
 .rank-gold .rank-avatar {
