@@ -15,3 +15,11 @@ export const uploadImageApi = (file) => {
         }
     );
 };
+
+export const uploadAvatarApi = (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return axiosClient.post("/uploads/avatar", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+    });
+};
