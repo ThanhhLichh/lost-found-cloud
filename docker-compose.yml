@@ -1,16 +1,4 @@
 services:
-  mysql:
-    image: mysql:8.0
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: lostfound_db
-      MYSQL_USER: lostfound_user
-      MYSQL_PASSWORD: lostfound_pass
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
 
   backend:
     build: ./backend
@@ -21,8 +9,6 @@ services:
       - "8000:8000"
     volumes:
       - ./backend/gcp-key.json:/app/gcp-key.json
-    depends_on:
-      - mysql
 
   frontend:
     build:
@@ -34,6 +20,3 @@ services:
       - "80:80"
     depends_on:
       - backend
-
-volumes:
-  mysql_data:
