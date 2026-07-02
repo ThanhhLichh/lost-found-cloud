@@ -1,0 +1,18 @@
+services:
+  backend:
+    image: asia-southeast1-docker.pkg.dev/lost-and-found-500816/lost-found-repo/backend:latest
+    restart: always
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/gcp-key.json:/app/gcp-key.json
+
+  frontend:
+    image: asia-southeast1-docker.pkg.dev/lost-and-found-500816/lost-found-repo/frontend:latest
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
