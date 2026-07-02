@@ -1,23 +1,41 @@
-name: Deploy to Compute Engine
+name: build and push images
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
+
+env:
+  PROJECT_ID: lost-and-found-500816
+  REGION: asia-southeast1
+  REPOSITORY: lost-found-repo
 
 jobs:
-  deploy:
+  build-push:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Auth to Google Cloud
+        uses: google-github-actions/auth@v2
         with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM_SSH_KEY }}
-          script: |
-            cd ~/lost-found-cloud
-            git pull origin main
-            docker compose up -d --build
-            docker image prune -f
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker $REGION-docker.pkg.dev --quiet
+
+      - name: Build and push backend
+        run: |
+          docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/backend:latest ./backend
+          docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/backend:latest
+
+      - name: Build and push frontend
+        run: |
+          docker build \
+            --build-arg VITE_API_URL=/api \
+            -t $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/frontend:latest ./frontend
+          docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/frontend:latest
